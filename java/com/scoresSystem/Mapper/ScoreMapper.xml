@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoresSystem.Mapper.ScoreMapper">
+        <resultMap id="ScrMap" type="Score">
+            <id column="scores_id" property="scoresId"/>
+            <result column="stu_id" property="studentNo"/>
+            <result column="sub_id" property="subjectId"/>
+            <result column="score" property="score"/>
+            <result column="scores_valid" property="valid"/>
+            <collection property="student" javaType="Student">
+                <id column="student_no" property="studentNo"/>
+                <result column="student_name" property="studentName"/>
+                <result column="student_sex" property="studentSex"/>
+                <result column="student_valid" property="studentValid"/>
+                <result column="student_age" property="studentAge"/>
+                <result column="student_birthday" property="studentBirthday"/>
+                <result column="student_password" property="studentPassword"/>
+            </collection>
+            <collection property="subject" javaType="Subject">
+                <id column="id" property="id"/>
+                <result column="name" property="name"/>
+                <result column="description" property="description"/>
+                <result column="time" property="time"/>
+                <result column="valid" property="valid"/>
+            </collection>
+        </resultMap>
+    <insert id="insertScore">
+        insert into tb_scores values (null,#{studentNo},#{subjectId},#{score},1)
+    </insert>
+    <update id="deleteScoreByScoreId">
+        update tb_scores set scores_valid=0 where scores_id=#{scoresId}
+    </update>
+    <update id="updateScore">
+        update tb_scores
+        <set>
+        <if test="studentNo !=null and studentNo != ''">
+            stu_id=#{studentNo},
+        </if>
+        <if test="subjectId !=null and subjectId != ''">
+            sub_id=#{subjectId},
+        </if>
+        <if test="score !=null and score != ''">
+            score=#{score},
+        </if>
+        </set>
+        where scores_id=#{scoresId}
+    </update>
+    <select id="getAllScoreByPage" resultMap="ScrMap">
+        SELECT * FROM tb_scores
+            INNER JOIN tb_student ON tb_scores.stu_id=tb_student.student_no
+            INNER JOIN tb_subjects on tb_scores.sub_id=tb_subjects.id
+            <where>
+                <if test="studentName !=null and studentName !=''">
+                    and tb_student.student_name like Concat('%',#{studentName},'%')
+                </if>
+                 and scores_valid=1
+            </where>
+            ORDER BY scores_id
+            LIMIT #{pageIndex},#{pageSize};
+    </select>
+    <select id="countScoreByPage" resultType="java.lang.Integer">
+        SELECT count(scores_id) FROM tb_scores
+        INNER JOIN tb_student ON tb_scores.stu_id=tb_student.student_no
+        INNER JOIN tb_subjects on tb_scores.sub_id=tb_subjects.id
+        <where>
+            <if test="studentName !=null and studentName !=''">
+                and tb_student.student_name=#{studentName}
+            </if>
+            and scores_valid=1
+        </where>
+    </select>
+</mapper>

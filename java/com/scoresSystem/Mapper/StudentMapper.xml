@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoresSystem.Mapper.StudentMapper">
+   <resultMap id="stuMap" type="Student">
+       <id column="student_no" property="studentNo"/>
+       <result column="student_name" property="studentName"/>
+       <result column="student_sex" property="studentSex"/>
+       <result column="student_valid" property="studentValid"/>
+       <result column="student_age" property="studentAge"/>
+       <result column="student_birthday" property="studentBirthday"/>
+       <result column="student_password" property="studentPassword"/>
+   </resultMap>
+    <insert id="addStudent" parameterType="Student">
+        INSERT INTO tb_student
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            student_no,
+            student_name,
+            student_sex,
+            student_password,
+            <if test="studentAge != null">student_age,</if>
+            <if test="studentBirthday != null">student_birthday,</if>
+            student_valid
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{studentNo},
+            #{studentName},
+            #{studentSex},
+            #{studentPassword,jdbcType=VARCHAR},
+            <if test="studentAge != null">#{studentAge},</if>
+            <if test="studentBirthday != null">#{studentBirthday},</if>
+            #{studentValid,jdbcType=INTEGER}
+        </trim>
+    </insert>
+    <update id="updateStudent" parameterType="Student">
+        UPDATE tb_student
+        <set>
+            <if test="studentName != null and studentName != ''">
+                student_name = #{studentName},
+            </if>
+            <if test="studentSex != null and studentSex != ''">
+                student_sex = #{studentSex},
+            </if>
+            <if test="studentAge != null">
+                student_age = #{studentAge},
+            </if>
+            <if test="studentBirthday != null">
+                student_birthday = #{studentBirthday},
+            </if>
+        </set>
+        WHERE student_no = #{studentNo}
+    </update>
+    <update id="deleteStudent" parameterType="Integer">
+        update tb_student set student_valid=0 where student_no=#{No}
+    </update>
+    <select id="getAllStudents" resultMap="stuMap">
+            select * from tb_student where student_valid=1
+    </select>
+    <select id="getAllStudentByPage" resultMap="stuMap">
+        select * from tb_student where student_valid=1
+        <if test="studentName !=null and studentName !=''">
+            and student_name like CONCAT('%', #{studentName}, '%')
+        </if>
+        limit #{pagestart},#{pagesize}
+    </select>
+    <select id="Login" resultType="com.scoresSystem.pojo.Student">
+        select * from tb_student where student_valid=1 and student_name=${username} and student_password=${password}
+    </select>
+    <select id="countStudent" resultType="java.lang.Integer">
+        select count(student_no) from tb_student where student_valid=1
+        <if test="studentName !=null and studentName !=''">
+            and student_name like CONCAT('%', #{studentName}, '%')
+        </if>
+    </select>
+    <select id="getStudentByNo" resultType="com.scoresSystem.pojo.Student">
+        select * from tb_student where student_no=#{No}
+    </select>
+</mapper>

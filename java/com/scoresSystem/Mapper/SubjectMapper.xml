@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoresSystem.Mapper.SubjectMapper">
+    <resultMap id="SubMap" type="Subject">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="time" property="time"/>
+        <result column="valid" property="valid"/>
+    </resultMap>
+    <insert id="addSubject" parameterType="Subject">
+        insert into tb_subjects
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,
+            name,
+            <if test="description != null and description != ''">
+                description,
+            </if>
+            <if test="time != null and time != ''">
+                time,
+            </if>
+            valid
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            null,
+            #{name},
+            <if test="description != null and description != ''">
+                #{description},
+            </if>
+            <if test="time != null and time != ''">
+                #{time},
+            </if>
+            #{valid}
+        </trim>
+    </insert>
+    <update id="updateSubject" parameterType="Subject">
+        update tb_subjects
+        <set>
+        <if test="name !=null and name != ''">
+            name=#{name},
+        </if>
+        <if test="description !=null and description != ''">
+            description=#{description},
+        </if>
+        <if test="time !=null and time != ''">
+            time=#{time},
+        </if>
+        </set>
+        where id=#{id}
+    </update>
+    <update id="deleteSubject" parameterType="Subject">
+        update tb_subjects set valid=0 where id=#{id}
+    </update>
+    <select id="getAllSubjectByPage" resultMap="SubMap">
+        select * from tb_subjects where valid=1
+        <if test="subjectName !=null and subjectName !=''">
+            and name like CONCAT('%', #{subjectName}, '%')
+        </if>
+        limit #{pagestart},#{pagesize}
+    </select>
+
+    <select id="countSubject" resultType="java.lang.Integer">
+        select count(id) from tb_subjects where valid=1
+        <if test="name !=null and name !=''">
+            and name like CONCAT('%', #{name}, '%')
+        </if>
+    </select>
+    <select id="getAllSubject" resultType="com.scoresSystem.pojo.Subject">
+        select * from tb_subjects where valid=1
+    </select>
+</mapper>
